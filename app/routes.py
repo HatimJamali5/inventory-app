@@ -1,3 +1,4 @@
+import base64
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 import random
 import string
@@ -7,7 +8,6 @@ from flask import current_app
 from werkzeug.utils import secure_filename
 import qrcode
 import io
-import base64
 from flask import send_file
 from functools import wraps
 from flask import abort
@@ -92,7 +92,7 @@ def add_product():
         name = request.form.get('name', '').strip()
         model_number = request.form.get('model_number', '').strip()
         barcode = request.form.get('barcode', '').strip()
-        # Use barcode if provided, else use model_number, else use name
+        # Auto-generate barcode if not provided
         if not barcode:
             barcode = model_number if model_number else name
 
@@ -117,6 +117,7 @@ def add_product():
 
         product = Product(
             name=name,
+            model_number=model_number,
             barcode=barcode,
             quantity=quantity,
             price=price,
@@ -333,7 +334,8 @@ def print_label(product_id):
             custom_price = None
 
     # Generate QR code (or use barcode library for barcode)
-    qr = qrcode.make(f"{product.name} | ID:{product.id}")
+    qr_data = product.barcode or product.model_number or product.name
+    qr = qrcode.make(qr_data)
     buf = io.BytesIO()
     qr.save(buf, format='PNG')
     qr_b64 = base64.b64encode(buf.getvalue()).decode('ascii')
@@ -535,9 +537,7 @@ def export_inventory():
 @main.route('/product_barcode/<int:product_id>')
 def product_barcode(product_id):
     product = Product.query.get_or_404(product_id)
-    # Use barcode if present, else use product name
-    code_value = product.barcode or product.name
-    # Generate QR code image
+    code_value = product.barcode or product.name or product.model_number or str(product.id)
     img = qrcode.make(code_value)
     buf = io.BytesIO()
     img.save(buf, format='PNG')
