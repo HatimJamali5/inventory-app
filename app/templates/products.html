@@ -19,55 +19,57 @@
 </form>
 <div class="card shadow border-0">
     <div class="card-body p-0">
-        <table class="table table-hover mb-0 align-middle">
-            <thead class="table-primary">
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Category</th>
-                    {% if session.get('role') == 'admin' %}
-                        <th>Value</th>
-                        <th>Cost Price</th>
-                    {% endif %}
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in products %}
-                <tr>
-                    <td>{{ p.id }}</td>
-                    <td>{{ p.name }}</td>
-                    <td>{{ p.quantity }}</td>
-                    <td>₨{{ "%.2f"|format(p.price) }}</td>
-                    <td>{{ p.category.name if p.category else '' }}</td>
-                    {% if session.get('role') == 'admin' %}
-                        <td>₨{{ "%.2f"|format(p.quantity * p.price) }}</td>
-                        <td>₨{{ "%.2f"|format(p.cost_price or 0) }}</td>
-                    {% endif %}
-                    <td>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-primary">
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Category</th>
                         {% if session.get('role') == 'admin' %}
-                            <a href="{{ url_for('main.edit_product', id=p.id) }}" class="btn btn-sm btn-warning me-1"><i class="bi bi-pencil"></i> Edit</a>
-                            <a href="{{ url_for('main.delete_product', id=p.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this product?');"><i class="bi bi-trash"></i> Delete</a>
+                            <th>Value</th>
+                            <th>Cost Price</th>
                         {% endif %}
-                        <a href="{{ url_for('main.print_label', product_id=p.id) }}" class="btn btn-sm btn-info me-1"><i class="bi bi-printer"></i> Print Label</a>
-                        <button type="button" class="btn btn-outline-dark btn-sm" onclick="showBarcode({{ p.id }}, {{ p.name|tojson }})">
-                            <i class="bi bi-upc-scan"></i> Show Barcode/QR
-                        </button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-            {% if session.get('role') == 'admin' %}
-            <tfoot>
-                <tr>
-                    <td colspan="5" class="text-end fw-bold">Total Inventory Value:</td>
-                    <td colspan="2" class="fw-bold">₨{{ "%.2f"|format(total_value) }}</td>
-                </tr>
-            </tfoot>
-            {% endif %}
-        </table>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in products %}
+                    <tr>
+                        <td>{{ p.id }}</td>
+                        <td>{{ p.name }}</td>
+                        <td>{{ p.quantity }}</td>
+                        <td>₨{{ "%.2f"|format(p.price) }}</td>
+                        <td>{{ p.category.name if p.category else '' }}</td>
+                        {% if session.get('role') == 'admin' %}
+                            <td>₨{{ "%.2f"|format(p.quantity * p.price) }}</td>
+                            <td>₨{{ "%.2f"|format(p.cost_price or 0) }}</td>
+                        {% endif %}
+                        <td>
+                            {% if session.get('role') == 'admin' %}
+                                <a href="{{ url_for('main.edit_product', id=p.id) }}" class="btn btn-sm btn-warning me-1"><i class="bi bi-pencil"></i> Edit</a>
+                                <a href="{{ url_for('main.delete_product', id=p.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this product?');"><i class="bi bi-trash"></i> Delete</a>
+                            {% endif %}
+                            <a href="{{ url_for('main.print_label', product_id=p.id) }}" class="btn btn-sm btn-info me-1"><i class="bi bi-printer"></i> Print Label</a>
+                            <button type="button" class="btn btn-outline-dark btn-sm" onclick="showBarcode({{ p.id }}, {{ p.name|tojson }})">
+                                <i class="bi bi-upc-scan"></i> Show Barcode/QR
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                {% if session.get('role') == 'admin' %}
+                <tfoot>
+                    <tr>
+                        <td colspan="5" class="text-end fw-bold">Total Inventory Value:</td>
+                        <td colspan="2" class="fw-bold">₨{{ "%.2f"|format(total_value) }}</td>
+                    </tr>
+                </tfoot>
+                {% endif %}
+            </table>
+        </div>
     </div>
 </div>
 {% if qr_b64 %}
@@ -100,5 +102,4 @@ function showBarcode(productId, productName) {
     barcodeModal.show();
 }
 </script>
-
 {% endblock %}
