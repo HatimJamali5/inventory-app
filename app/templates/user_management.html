@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}User Management{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="card shadow-sm mt-4 border-0">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="bi bi-people"></i> User Management</h4>
+        </div>
+        <div class="card-body">
+            <a href="{{ url_for('main.register') }}" class="btn btn-success mb-3">
+                <i class="bi bi-person-plus"></i> Add New User
+            </a>
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>
+                            {% if user.role == 'admin' %}
+                                <span class="badge bg-danger">Admin</span>
+                            {% else %}
+                                <span class="badge bg-secondary">User</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.role != 'admin' %}
+                                <form method="POST" action="{{ url_for('main.promote_user', user_id=user.id) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Promote this user to admin?')">Promote to Admin</button>
+                                </form>
+                                <form method="POST" action="{{ url_for('main.delete_user', user_id=user.id) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this user?')">Delete</button>
+                                </form>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

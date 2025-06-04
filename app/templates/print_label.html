@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Print Label{% endblock %}
+{% block content %}
+<style>
+@media print {
+    body * { visibility: hidden !important; }
+    .label-area, .label-area * { visibility: visible !important; }
+    .label-area { position: absolute; left: 0; top: 0; width: 100%; }
+    .no-print { display: none !important; }
+}
+.label-area {
+    max-width: 340px;
+    margin: 40px auto;
+    border: 1.5px solid #444;
+    padding: 22px 18px 16px 18px;
+    border-radius: 12px;
+    background: #fff;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.label-logo {
+    max-height: 48px;
+    margin-bottom: 10px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+.label-title {
+    font-size: 1.15rem;
+    font-weight: bold;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+}
+.label-product {
+    font-size: 1.08rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+    margin-top: 2px;
+}
+.label-price {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #222;
+    margin-bottom: 10px;
+    margin-top: 2px;
+    letter-spacing: 1px;
+}
+.label-qr {
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+</style>
+<div class="container">
+    <h3 class="mb-3">Print Product Label</h3>
+    <form method="POST" class="no-print mb-4">
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" name="show_price" id="show_price" {% if show_price %}checked{% endif %}>
+            <label class="form-check-label" for="show_price">Show Price on Label</label>
+        </div>
+        <div class="mb-2">
+            <label for="custom_price" class="form-label">Custom Price (leave blank for product price):</label>
+            <input
+                type="text"
+                name="custom_price"
+                id="custom_price"
+                class="form-control"
+                value="{{ custom_price if custom_price is not none else '' }}"
+                placeholder="e.g. 499.99, FREE, ASK"
+            />
+            <small class="text-muted">
+                Enter a price to override the product price. Leave blank to use the default price (₨{{ "%.2f"|format(product.price) }}).
+            </small>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Preview</button>
+        <button type="button" class="btn btn-success" onclick="window.print()">Print Label</button>
+        <a href="{{ url_for('main.view_products') }}" class="btn btn-secondary">Back</a>
+    </form>
+    <div class="label-area">
+        {% if settings and settings.logo_filename %}
+            <img src="{{ url_for('static', filename='uploads/' ~ settings.logo_filename) }}" class="label-logo" alt="Logo">
+        {% endif %}
+        <div class="label-title">{{ settings.name if settings else "Business Name" }}</div>
+        <div class="label-product">{{ product.name }}</div>
+        {% if show_price %}
+            <div class="label-price">
+                {% if custom_price %}
+                    {{ custom_price }}
+                {% else %}
+                    ₨{{ "%.2f"|format(product.price) }}
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="label-price" style="color:#bbb;">&nbsp;</div>
+        {% endif %}
+        <div class="label-qr">
+            <img src="data:image/png;base64,{{ qr_b64 }}" alt="QR Code" style="max-height:60px;">
+        </div>
+    </div>
+</div>
+{% endblock %}

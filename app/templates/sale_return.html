@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Sale Return{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-danger text-white text-center">
+                <h4 class="mb-0"><i class="bi bi-arrow-counterclockwise"></i> Sale Return - Invoice #{{ sale.id }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% for item in items %}
+                    <div class="mb-3">
+                        <label>{{ item.product.name }} (Sold: {{ item.quantity }})</label>
+                        <input type="number" name="return_qty_{{ item.id }}" min="0" max="{{ item.quantity }}" class="form-control" value="0">
+                    </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-danger">Return</button>
+                    <a href="{{ url_for('main.sales_history') }}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

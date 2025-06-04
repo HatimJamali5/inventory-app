@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Replace Product{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-warning text-dark text-center">
+                <h4 class="mb-0"><i class="bi bi-arrow-repeat"></i> Replace Product - Invoice #{{ sale.id }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label>Select Product to Replace:</label>
+                        <select name="old_item_id" class="form-select">
+                            {% for item in items %}
+                            <option value="{{ item.id }}">{{ item.product.name }} (Qty: {{ item.quantity }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label>Select New Product:</label>
+                        <select name="new_product_id" class="form-select">
+                            {% for product in products %}
+                            <option value="{{ product.id }}">{{ product.name }} (In Stock: {{ product.quantity }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label>Quantity:</label>
+                        <input type="number" name="replace_qty" min="1" class="form-control" value="1">
+                    </div>
+                    <button type="submit" class="btn btn-warning">Replace</button>
+                    <a href="{{ url_for('main.sales_history') }}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

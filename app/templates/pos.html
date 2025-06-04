@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+{% block title %}POS{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white text-center">
+                <h4 class="mb-0"><i class="bi bi-cash-register"></i> Point of Sale</h4>
+            </div>
+            <div class="card-body">
+                <h2 class="mb-4">Create Invoice</h2>
+                <form method="POST" id="pos-form">
+                    <!-- Add this above the product search input -->
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-outline-dark w-100 mb-2" onclick="startScanner()">
+                            <i class="bi bi-upc-scan"></i> Scan Product Barcode/QR
+                        </button>
+                        <div id="scanner" style="width:100%; max-width:400px; margin:auto; display:none;"></div>
+                        <button type="button" class="btn btn-secondary w-100 mt-2" id="stop-scanner-btn" style="display:none;" onclick="stopScanner()">Stop Scanner</button>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" id="product-search" class="form-control" placeholder="Search product by name...">
+                        <div id="search-results" class="list-group"></div>
+                    </div>
+                    <h5>Invoice Items</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle" id="cart-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Available</th>
+                                    <th>Unit Price</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                    <th>Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cart-body"></tbody>
+                        </table>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 offset-md-8">
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">Discount</span>
+                                <input type="number" step="0.01" min="0" name="discount_value" value="0" class="form-control" id="discount-value">
+                                <select class="form-select" id="discount-type" name="discount_type" style="max-width:120px;">
+                                    <option value="amount">₨ Amount</option>
+                                    <option value="percent">% Percent</option>
+                                </select>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span><strong>Subtotal:</strong></span>
+                                <span id="subtotal">₨0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span><strong>Grand Total:</strong></span>
+                                <span id="grand-total">₨0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="cart_data" id="cart-data">
+                    <input type="hidden" name="discount_type" id="discount-hidden-type">
+                    <input type="hidden" name="discount_value" id="discount-hidden-value">
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-success btn-lg">Generate Invoice</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script>
+const products = [
+    {% for p in products %}
+    {
+        id: {{ p.id }},
+        name: "{{ p.name|escape }}",
+        quantity: {{ p.quantity }},
+        price: {{ "%.2f"|format(p.price) }}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
+
+let cart = [];
+
+function renderCart() {
+    const tbody = document.getElementById('cart-body');
+    tbody.innerHTML = '';
+    let subtotal = 0;
+    cart.forEach((item, idx) => {
+        const total = item.quantity * item.price;
+        subtotal += total;
+        tbody.innerHTML += `
+            <tr>
+                <td>${item.name}</td>
+                <td>${item.available}</td>
+                <td><input type="number" step="0.01" class="form-control price-input" value="${item.price}" min="0" data-idx="${idx}"></td>
+                <td><input type="number" class="form-control qty-input" value="${item.quantity}" min="1" max="${item.available}" data-idx="${idx}"></td>
+                <td>₨${(total).toFixed(2)}</td>
+                <td><button type="button" class="btn btn-danger btn-sm remove-btn" data-idx="${idx}">Remove</button></td>
+            </tr>
+        `;
+    });
+    document.getElementById('subtotal').textContent = '₨' + subtotal.toFixed(2);
+
+    let discountValue = parseFloat(document.getElementById('discount-value').value) || 0;
+    let discountType = document.getElementById('discount-type').value;
+    let discount = 0;
+    if (discountType === 'percent') {
+        discount = subtotal * (discountValue / 100);
+    } else {
+        discount = discountValue;
+    }
+    document.getElementById('grand-total').textContent = '₨' + (subtotal - discount).toFixed(2);
+
+    // Save discount info for backend
+    document.getElementById('cart-data').value = JSON.stringify(cart);
+    document.getElementById('discount-hidden-type').value = discountType;
+    document.getElementById('discount-hidden-value').value = discountValue;
+}
+
+document.getElementById('product-search').addEventListener('input', function() {
+    const query = this.value.toLowerCase();
+    const results = products.filter(p => p.name.toLowerCase().includes(query) && !cart.some(c => c.id === p.id));
+    const resultsDiv = document.getElementById('search-results');
+    resultsDiv.innerHTML = '';
+    if (query && results.length) {
+        results.forEach(p => {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'list-group-item list-group-item-action';
+            item.textContent = `${p.name} (Stock: ${p.quantity})`;
+            item.onclick = function() {
+                cart.push({id: p.id, name: p.name, available: p.quantity, price: parseFloat(p.price), quantity: 1});
+                renderCart();
+                resultsDiv.innerHTML = '';
+                document.getElementById('product-search').value = '';
+            };
+            resultsDiv.appendChild(item);
+        });
+    }
+});
+
+document.getElementById('cart-body').addEventListener('input', function(e) {
+    const idx = parseInt(e.target.getAttribute('data-idx'));
+    if (isNaN(idx) || idx < 0 || idx >= cart.length) return;
+    if (e.target.classList.contains('qty-input')) {
+        let val = parseInt(e.target.value) || 1;
+        val = Math.max(1, Math.min(val, cart[idx].available));
+        cart[idx].quantity = val;
+        e.target.value = val;
+    }
+    if (e.target.classList.contains('price-input')) {
+        let val = parseFloat(e.target.value) || 0;
+        val = Math.max(0, val);
+        cart[idx].price = val;
+        e.target.value = val;
+    }
+    renderCart();
+});
+
+document.getElementById('cart-body').addEventListener('click', function(e) {
+    if (e.target.classList.contains('remove-btn')) {
+        const idx = parseInt(e.target.getAttribute('data-idx'));
+        if (!isNaN(idx) && idx >= 0 && idx < cart.length) {
+            cart.splice(idx, 1);
+            renderCart();
+        }
+    }
+});
+
+document.getElementById('discount-value').addEventListener('input', renderCart);
+document.getElementById('discount-type').addEventListener('change', renderCart);
+
+document.getElementById('pos-form').addEventListener('submit', function() {
+    document.getElementById('cart-data').value = JSON.stringify(cart);
+});
+
+let html5QrcodeScanner = null;
+
+function startScanner() {
+    document.getElementById('scanner').style.display = 'block';
+    document.getElementById('stop-scanner-btn').style.display = 'block';
+    if (!html5QrcodeScanner) {
+        html5QrcodeScanner = new Html5Qrcode("scanner");
+    }
+    html5QrcodeScanner.start(
+        { facingMode: "environment" },
+        {
+            fps: 10,
+            qrbox: 250
+        },
+        (decodedText, decodedResult) => {
+            // Try to find product by barcode or name
+            let found = false;
+            for (let p of products) {
+                if (p.barcode && decodedText.trim() === p.barcode.trim()) {
+                    addProductToCart(p);
+                    found = true;
+                    break;
+                }
+                // Optionally, match by name
+                if (decodedText.trim().toLowerCase() === p.name.trim().toLowerCase()) {
+                    addProductToCart(p);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                alert("Product not found in inventory: " + decodedText);
+            }
+            stopScanner();
+        },
+        (errorMessage) => {
+            // ignore scan errors
+        }
+    );
+}
+
+function stopScanner() {
+    if (html5QrcodeScanner) {
+        html5QrcodeScanner.stop().then(() => {
+            document.getElementById('scanner').style.display = 'none';
+            document.getElementById('stop-scanner-btn').style.display = 'none';
+        }).catch(err => {});
+    }
+}
+
+// Helper to add product to cart (reuse your cart logic)
+function addProductToCart(product) {
+    if (!cart.some(c => c.id === product.id)) {
+        cart.push({
+            id: product.id,
+            name: product.name,
+            available: product.quantity,
+            price: parseFloat(product.price),
+            quantity: 1
+        });
+        renderCart();
+    }
+}
+
+renderCart();
+</script>
+{% endblock %}

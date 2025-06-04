@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Sales History{% endblock %}
+{% block content %}
+<div class="card shadow border-0 mb-4">
+    <div class="card-header bg-primary text-white">
+        <strong><i class="bi bi-clock-history"></i> Sales History</strong>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-bordered table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Details</th>
+                    {% if session.get('role') == 'admin' %}
+                        <th>Profit</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in range(sales|length) %}
+                    {% set sale = sales[i] %}
+                    {% set profit = profits[i] %}
+                <tr>
+                    <td>{{ sale.date.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>₨{{ "%.2f"|format(sale.total) }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" type="button" data-bs-toggle="collapse" data-bs-target="#sale{{ sale.id }}">View</button>
+                        <form method="POST" action="{{ url_for('main.delete_sale', sale_id=sale.id) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this invoice?')">Delete</button>
+                        </form>
+                        <a href="{{ url_for('main.sale_return', sale_id=sale.id) }}" class="btn btn-sm btn-danger">Return</a>
+                        <a href="{{ url_for('main.replace_product', sale_id=sale.id) }}" class="btn btn-sm btn-warning">Replace</a>
+                    </td>
+                    {% if session.get('role') == 'admin' %}
+                        <td>₨{{ "%.2f"|format(profit) }}</td>
+                    {% endif %}
+                </tr>
+                <tr class="collapse" id="sale{{ sale.id }}">
+                    <td colspan="5">
+                        <ul class="list-group">
+                            {% for item in sale.items %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ item.product.name }} (x{{ item.quantity }}) - ₨{{ "%.2f"|format(item.price * item.quantity) }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-secondary text-white text-center">
+                <h4 class="mb-0"><i class="bi bi-gear"></i> Business Settings</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Business Name</label>
+                        <input type="text" name="business_name" class="form-control" value="{{ settings.business_name }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Business Address</label>
+                        <input type="text" name="business_address" class="form-control" value="{{ settings.business_address }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Contact Number</label>
+                        <input type="text" name="contact_number" class="form-control" value="{{ settings.contact_number }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Contact Email</label>
+                        <input type="email" name="contact_email" class="form-control" value="{{ settings.contact_email }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Type of Business</label>
+                        <input type="text" name="business_type" class="form-control" value="{{ settings.business_type }}">
+                    </div>
+                    <button type="submit" class="btn btn-secondary w-100">Save Settings</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

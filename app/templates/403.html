@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Access Forbidden{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white text-center">
+                    <h2 class="mb-0"><i class="bi bi-shield-lock"></i> Access Forbidden</h2>
+                </div>
+                <div class="card-body text-center">
+                    <div class="alert alert-danger" role="alert">
+                        <strong>Sorry!</strong> You do not have permission to access this page.
+                    </div>
+                    <p>If you believe this is a mistake, please contact your administrator.</p>
+                    <a href="{{ url_for('main.home') }}" class="btn btn-primary mt-2">
+                        <i class="bi bi-house"></i> Go to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

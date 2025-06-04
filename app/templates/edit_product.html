@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Edit Product{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-warning text-dark text-center">
+                <h4 class="mb-0"><i class="bi bi-pencil"></i> Edit Product</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" name="name" class="form-control" value="{{ product.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Quantity</label>
+                        <input type="number" name="quantity" class="form-control" value="{{ product.quantity }}" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Price</label>
+                        <input type="number" name="price" class="form-control" value="{{ product.price }}" min="0" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cost Price</label>
+                        <input type="number" name="cost_price" class="form-control" value="{{ product.cost_price or '' }}" min="0" step="0.01">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Category</label>
+                        <select name="category_id" class="form-select">
+                            {% for category in categories %}
+                                <option value="{{ category.id }}" {% if product.category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-warning w-100">Update Product</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

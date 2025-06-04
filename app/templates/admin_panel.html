@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Admin Panel{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="card shadow-sm mt-4 border-0">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="bi bi-shield-lock"></i> Admin Panel</h4>
+        </div>
+        <div class="card-body">
+            <p class="lead">Welcome, Admin! Here are your management options:</p>
+            <div class="row g-3">
+                <div class="col-md-6 col-lg-4">
+                    <a href="{{ url_for('main.view_products') }}" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-box-seam"></i> Manage Products
+                    </a>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <a href="{{ url_for('main.sales_history') }}" class="btn btn-outline-success w-100">
+                        <i class="bi bi-receipt"></i> View Sales & Profits
+                    </a>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <a href="{{ url_for('main.settings') }}" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-gear"></i> Business Settings
+                    </a>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <a href="{{ url_for('main.register') }}" class="btn btn-outline-warning w-100">
+                        <i class="bi bi-person-plus"></i> Add New User
+                    </a>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <a href="{{ url_for('main.user_management') }}" class="btn btn-outline-dark w-100">
+                        <i class="bi bi-people"></i> User Management
+                    </a>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <a href="{{ url_for('main.home') }}" class="btn btn-outline-dark w-100">
+                        <i class="bi bi-house"></i> Dashboard
+                    </a>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <a href="{{ url_for('main.import_inventory') }}" class="btn btn-outline-info w-100 mb-2">
+                        <i class="bi bi-upload"></i> Import Inventory (Excel)
+                    </a>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <a href="{{ url_for('main.export_inventory') }}" class="btn btn-outline-success w-100 mb-2">
+                        <i class="bi bi-download"></i> Export Inventory (Excel)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
