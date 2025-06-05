@@ -31,6 +31,7 @@ class Sale(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, server_default=db.func.now())
     total = db.Column(db.Float, nullable=False)
+    payment_method = db.Column(db.String(32), nullable=True)
     items = db.relationship('SaleItem', backref='sale', lazy=True)
 
 class SaleItem(db.Model):
@@ -40,6 +41,10 @@ class SaleItem(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Float, nullable=False)
     product = db.relationship('Product')
+
+    @property
+    def total(self):
+        return self.price * self.quantity
 
 class BusinessSettings(db.Model):
     id = db.Column(db.Integer, primary_key=True)

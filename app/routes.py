@@ -12,6 +12,8 @@ from flask import send_file
 from functools import wraps
 from flask import abort
 import pandas as pd
+from flask_login import login_required
+from datetime import datetime
 
 from .models import Product, Category, User, Sale, SaleItem, BusinessSettings
 from . import db
@@ -198,6 +200,7 @@ def pos():
         cart_data = request.form.get('cart_data')
         discount_type = request.form.get('discount_type', 'amount')
         discount_value = float(request.form.get('discount_value', 0))
+        payment_method = request.form.get('payment_method')  # <-- Add this line
         if not cart_data:
             flash('No items selected.')
             return render_template('pos.html', products=products)
@@ -219,7 +222,7 @@ def pos():
             discount = discount_value
         grand_total = subtotal - discount
         if items:
-            sale = Sale(total=grand_total)
+            sale = Sale(total=grand_total, payment_method=payment_method)  # <-- Save payment method
             db.session.add(sale)
             db.session.commit()
             for item in items:
@@ -547,6 +550,46 @@ def product_barcode(product_id):
 @main.app_errorhandler(403)
 def forbidden(e):
     return render_template('403.html'), 403
+
+@main.route('/generate_invoice', methods=['POST'])
+@login_required
+def generate_invoice():
+    settings = BusinessSettings.query.first()
+    payment_method = request.form.get('payment_method')
+    print("Payment method from form:", payment_method)
+    sale = Sale(
+        payment_method=payment_method
+    )
+    db.session.add(sale)
+    db.session.commit()
+    return render_template('bill.html', ..., settings=settings)
+
+@main.route('/sales_report', methods=['GET', 'POST'])
+def sales_report():
+    sales = []
+    start_date = end_date = None
+    if request.method == 'POST':
+        start_date_str = request.form.get('start_date')
+        end_date_str = request.form.get('end_date')
+        if start_date_str and end_date_str:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+            # Include the whole end day
+            end_date = end_date.replace(hour=23, minute=59, second=59)
+            sales = Sale.query.filter(Sale.date >= start_date, Sale.date <= end_date).order_by(Sale.date.desc()).all()
+    return render_template('sales_report.html', sales=sales, start_date=start_date, end_date=end_date)
+
+@main.route('/print_bill/<int:sale_id>')
+def print_bill(sale_id):
+    sale = Sale.query.get_or_404(sale_id)
+    settings = BusinessSettings.query.first()
+    # If you use QR code on bill, generate it here as in your POS route
+    import qrcode, io, base64
+    qr = qrcode.make(f"Invoice #{sale.id}")
+    buf = io.BytesIO()
+    qr.save(buf, format='PNG')
+    qr_b64 = base64.b64encode(buf.getvalue()).decode('ascii')
+    return render_template('bill.html', sale=sale, items=[], discount=0, total=sale.total, settings=settings, qr_b64=qr_b64)
 
 
 

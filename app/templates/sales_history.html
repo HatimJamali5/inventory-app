@@ -31,6 +31,9 @@
                         </form>
                         <a href="{{ url_for('main.sale_return', sale_id=sale.id) }}" class="btn btn-sm btn-danger">Return</a>
                         <a href="{{ url_for('main.replace_product', sale_id=sale.id) }}" class="btn btn-sm btn-warning">Replace</a>
+                        <a href="{{ url_for('main.print_bill', sale_id=sale.id) }}" class="btn btn-outline-primary btn-sm" target="_blank">
+                            <i class="bi bi-printer"></i> Print Bill
+                        </a>
                     </td>
                     {% if session.get('role') == 'admin' %}
                         <td>₨{{ "%.2f"|format(profit) }}</td>
@@ -41,7 +44,7 @@
                         <ul class="list-group">
                             {% for item in sale.items %}
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                {{ item.product.name }} (x{{ item.quantity }}) - ₨{{ "%.2f"|format(item.price * item.quantity) }}
+                                {{ item.product.name }} (x{{ item.quantity }}) - ₨{{ '%.2f'|format(item.total) }}
                             </li>
                             {% endfor %}
                         </ul>
@@ -50,6 +53,9 @@
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+    <div class="card-footer">
+        <a href="{{ url_for('main.sales_report') }}" class="btn btn-outline-info">Sales Report</a>
     </div>
 </div>
 {% endblock %}

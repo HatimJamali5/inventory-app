@@ -8,6 +8,17 @@
                 <h4 class="mb-0"><i class="bi bi-gear"></i> Business Settings</h4>
             </div>
             <div class="card-body">
+                {% if settings %}
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold">{{ settings.business_name }}</h2>
+                    <div>{{ settings.business_address }}</div>
+                    <div>Contact: {{ settings.contact_number }}</div>
+                    <div>Email: {{ settings.contact_email }}</div>
+                    {% if settings.business_type %}
+                        <div>Type: {{ settings.business_type }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
                 <form method="POST">
                     <div class="mb-3">
                         <label class="form-label">Business Name</label>

@@ -14,6 +14,112 @@
         .btn-primary, .btn-success, .btn-warning, .btn-danger { min-width: 90px; }
         .form-label { font-weight: 500; }
         .form-control:focus { box-shadow: 0 0 0 0.2rem #0d6efd33; }
+        @media print {
+            .btn, .navbar, .no-print {
+                display: none !important;
+            }
+        }
+        /* Dark mode styles */
+        body.dark-mode {
+            background-color: #181a1b !important;
+            color: #f8f9fa !important;
+        }
+        .dark-mode .card,
+        .dark-mode .table,
+        .dark-mode .table-responsive,
+        .dark-mode .navbar,
+        .dark-mode .dropdown-menu,
+        .dark-mode .form-control,
+        .dark-mode .alert {
+            background-color: #23272b !important;
+            color: #f8f9fa !important;
+            border-color: #343a40 !important;
+        }
+        .dark-mode .table,
+        .dark-mode .table th,
+        .dark-mode .table td,
+        .dark-mode .table-hover tbody tr,
+        .dark-mode .table-hover tbody tr:hover,
+        .dark-mode .table thead th,
+        .dark-mode .table tfoot th,
+        .dark-mode .table tfoot td,
+        .dark-mode .table-striped > tbody > tr:nth-of-type(odd),
+        .dark-mode .table-striped > tbody > tr:nth-of-type(even) {
+            background-color: #23272b !important;
+            color: #f8f9fa !important;
+            border-color: #343a40 !important;
+        }
+        .dark-mode .table-hover tbody tr:hover {
+            background-color: #343a40 !important;
+            color: #fff !important;
+        }
+        .dark-mode .table-striped > tbody > tr:nth-of-type(odd) {
+            background-color: #23272b !important;
+        }
+        .dark-mode .table-striped > tbody > tr:nth-of-type(even) {
+            background-color: #202225 !important;
+        }
+        .dark-mode .table-bordered {
+            border-color: #343a40 !important;
+        }
+        .dark-mode .dropdown-menu,
+        .dark-mode .dropdown-item {
+            background-color: #23272b !important;
+            color: #f8f9fa !important;
+        }
+        .dark-mode .dropdown-item {
+            color: #f8f9fa !important;
+        }
+        .dark-mode .dropdown-item:hover, 
+        .dark-mode .dropdown-item:focus, 
+        .dark-mode .dropdown-item.active {
+            background-color: #343a40 !important;
+            color: #fff !important;
+        }
+        .dark-mode .nav-link,
+        .dark-mode .navbar-brand,
+        .dark-mode .navbar-nav .nav-link {
+            color: #f8f9fa !important;
+        }
+        .dark-mode .nav-link:hover,
+        .dark-mode .navbar-brand:hover,
+        .dark-mode .navbar-nav .nav-link:hover {
+            color: #fff !important;
+        }
+        .dark-mode .btn-primary,
+        .dark-mode .btn-success,
+        .dark-mode .btn-warning,
+        .dark-mode .btn-danger,
+        .dark-mode .btn-outline-secondary {
+            background-color: #343a40 !important;
+            color: #f8f9fa !important;
+            border-color: #343a40 !important;
+        }
+        .dark-mode .navbar {
+            background-color: #23272b !important;
+        }
+        .dark-mode .form-control {
+            background-color: #23272b !important;
+            color: #f8f9fa !important;
+        }
+        .dark-mode .form-control:focus {
+            box-shadow: 0 0 0 0.2rem #0d6efd33;
+        }
+        .dark-mode .alert {
+            background-color: #23272b !important;
+            color: #f8f9fa !important;
+        }
+        .dark-mode .btn-close {
+            filter: invert(1);
+        }
+        .dark-mode .form-label,
+        .dark-mode label,
+        .dark-mode .form-check-label {
+            color: #f8f9fa !important;
+        }
+        .dark-mode .dropdown-divider {
+            border-color: #343a40 !important;
+        }
     </style>
 </head>
 <body>
@@ -26,6 +132,11 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     {% if session.get('user_id') %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.home') }}">
+                                <i class="bi bi-house"></i> Dashboard
+                            </a>
+                        </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Menu
@@ -42,12 +153,24 @@
                                 <li><a class="dropdown-item text-danger" href="{{ url_for('main.logout') }}">Logout</a></li>
                             </ul>
                         </li>
+                        <!-- Dark mode toggle button -->
+                        <li class="nav-item">
+                            <button id="theme-toggle" class="btn btn-outline-light ms-2" type="button">
+                                <i class="bi bi-moon"></i> Dark Mode
+                            </button>
+                        </li>
                     {% else %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('main.login') }}">Login</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('main.register') }}">Register</a>
+                        </li>
+                        <!-- Dark mode toggle button for guests -->
+                        <li class="nav-item">
+                            <button id="theme-toggle" class="btn btn-outline-light ms-2" type="button">
+                                <i class="bi bi-moon"></i> Dark Mode
+                            </button>
                         </li>
                     {% endif %}
                 </ul>
@@ -66,13 +189,54 @@
           {% endif %}
         {% endwith %}
         {% block content %}
-        <div class="table-responsive">
-            <table class="table table-hover mb-0 align-middle">
-                <!-- ... -->
-            </table>
-        </div>
+<a href="{{ request.referrer or url_for('main.home') }}" class="btn btn-outline-secondary mb-3">
+    <i class="bi bi-arrow-left"></i> Go Back
+</a>
+<div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>₨{{ '%.2f'|format(item.price) }}</td>
+                <td>₨{{ '%.2f'|format(item.price * item.quantity) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
         {% endblock %}
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggle = document.getElementById('theme-toggle');
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            if (toggle) toggle.innerHTML = '<i class="bi bi-brightness-high"></i> Light Mode';
+        }
+        if (toggle) {
+            toggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                if (document.body.classList.contains('dark-mode')) {
+                    toggle.innerHTML = '<i class="bi bi-brightness-high"></i> Light Mode';
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    toggle.innerHTML = '<i class="bi bi-moon"></i> Dark Mode';
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+        }
+    });
+    </script>
 </body>
 </html>

@@ -8,32 +8,85 @@
                 <h4 class="mb-0"><i class="bi bi-receipt"></i> Invoice #{{ sale.id }}</h4>
             </div>
             <div class="card-body">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold">{{ settings.business_name }}</h2>
+                    <div>{{ settings.business_address }}</div>
+                    <div>Contact: {{ settings.contact_number }}</div>
+                    <div>Email: {{ settings.contact_email }}</div>
+                </div>
                 <p><strong>Date:</strong> {{ sale.date.strftime('%Y-%m-%d %H:%M') }}</p>
+                <p><strong>Payment Method:</strong> {{ sale.payment_method }}</p>
+
                 <table class="table table-bordered align-middle">
                     <thead>
                         <tr>
                             <th>Product</th>
                             <th>Qty</th>
-                            <th>Price</th>
-                            <th>Subtotal</th>
+                            <th>Unit Price</th>
+                            <th>Total</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for item in sale.items %}
+                        {% for item in items %}
                         <tr>
                             <td>{{ item.product.name }}</td>
                             <td>{{ item.quantity }}</td>
-                            <td>₨{{ "%.2f"|format(item.price) }}</td>
-                            <td>₨{{ "%.2f"|format(item.price * item.quantity) }}</td>
+                            <td>₨{{ '%.2f'|format(item.price) }}</td>
+                            <td>₨{{ '%.2f'|format(item.price * item.quantity) }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                            <td>₨{{ '%.2f'|format(total) }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Discount:</strong></td>
+                            <td>₨{{ '%.2f'|format(discount) }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Grand Total:</strong></td>
+                            <td id="grand-total-cell">₨{{ '%.2f'|format(sale.total) }}</td>
+                        </tr>
+                        {% if sale.payment_method == 'Credit Card' %}
+                        <tr>
+                            <td colspan="3" class="text-end align-middle">
+                                <strong>Bank Charges (%)</strong>
+                                <input type="number" min="0" max="100" step="0.01" id="bank-charge" value="2"
+                                    style="width:70px; display:inline-block; margin-left:10px;">
+                            </td>
+                            <td>
+                                <span id="bank-charge-amount" class="fw-bold"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Grand Total (with Bank Charges):</strong></td>
+                            <td><span id="grand-total-with-bank" class="fw-bold"></span></td>
+                        </tr>
+                        {% endif %}
+                    </tfoot>
                 </table>
-                <div class="text-end fw-bold fs-5">
-                    Total: ₨{{ "%.2f"|format(sale.total) }}
+                <div class="text-end mb-3">
+                    <button class="btn btn-primary" onclick="window.print()">
+                        <i class="bi bi-printer"></i> Print Bill
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% if sale.payment_method == 'Credit Card' %}
+<script>
+function updateBankCharge() {
+    const percent = parseFloat(document.getElementById('bank-charge').value) || 0;
+    const total = {{ sale.total|float }};
+    const charge = total * percent / 100;
+    document.getElementById('bank-charge-amount').textContent = '₨' + charge.toFixed(2);
+    document.getElementById('grand-total-with-bank').textContent = '₨' + (total + charge).toFixed(2);
+}
+document.getElementById('bank-charge').addEventListener('input', updateBankCharge);
+updateBankCharge();
+</script>
+{% endif %}
 {% endblock %}

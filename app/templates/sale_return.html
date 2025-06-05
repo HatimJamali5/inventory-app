@@ -9,12 +9,28 @@
             </div>
             <div class="card-body">
                 <form method="POST">
-                    {% for item in items %}
-                    <div class="mb-3">
-                        <label>{{ item.product.name }} (Sold: {{ item.quantity }})</label>
-                        <input type="number" name="return_qty_{{ item.id }}" min="0" max="{{ item.quantity }}" class="form-control" value="0">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Sold Quantity</th>
+                                    <th>Price per Unit</th>
+                                    <th>Total Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td>{{ item.product.name }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>₨{{ '%.2f'|format(item.price) }}</td>
+                                    <td>₨{{ '%.2f'|format(item.price * item.quantity) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                    {% endfor %}
                     <button type="submit" class="btn btn-danger">Return</button>
                     <a href="{{ url_for('main.sales_history') }}" class="btn btn-secondary">Cancel</a>
                 </form>

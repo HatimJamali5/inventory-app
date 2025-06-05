@@ -39,4 +39,12 @@
         </div>
     </div>
 </div>
+{% for item in items %}
+<tr>
+    <td>{{ item.product.name }}</td>
+    <td>{{ item.quantity }}</td>
+    <td>₨{{ '%.2f'|format(item.price) }}</td>
+    <td>₨{{ '%.2f'|format(item.price * item.quantity) }}</td>
+</tr>
+{% endfor %}
 {% endblock %}

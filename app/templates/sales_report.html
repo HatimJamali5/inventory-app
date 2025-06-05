@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Sales Report{% endblock %}
+{% block content %}
+<style>
+@media print {
+    form, .btn, .card-footer, nav, .alert { display: none !important; }
+    table { font-size: 12pt; }
+}
+</style>
+<div class="container mt-4">
+    <h2>Sales Report</h2>
+    <form method="POST" class="row g-3 mb-4">
+        <div class="col-auto">
+            <label for="start_date" class="form-label">Start Date</label>
+            <input type="date" class="form-control" name="start_date" id="start_date" required value="{{ start_date.strftime('%Y-%m-%d') if start_date else '' }}">
+        </div>
+        <div class="col-auto">
+            <label for="end_date" class="form-label">End Date</label>
+            <input type="date" class="form-control" name="end_date" id="end_date" required value="{{ end_date.strftime('%Y-%m-%d') if end_date else '' }}">
+        </div>
+        <div class="col-auto align-self-end">
+            <button type="submit" class="btn btn-primary">Generate Report</button>
+        </div>
+    </form>
+    {% if sales %}
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Invoice #</th>
+                <th>Total</th>
+                <th>Payment Method</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sale in sales %}
+            <tr>
+                <td>{{ sale.date.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ sale.id }}</td>
+                <td>₨{{ '%.2f'|format(sale.total) }}</td>
+                <td>{{ sale.payment_method }}</td>
+            </tr>
+            {% endfor %}
+            {% set total_sales = sales | sum(attribute='total') %}
+            <tr>
+                <td colspan="2" class="text-end"><strong>Total Sales:</strong></td>
+                <td colspan="2"><strong>₨{{ '%.2f'|format(total_sales) }}</strong></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="mb-3">
+        <button class="btn btn-success" onclick="window.print()">
+            <i class="bi bi-printer"></i> Print Report
+        </button>
+    </div>
+    {% elif start_date and end_date %}
+        <div class="alert alert-warning">No sales found for the selected dates.</div>
+    {% endif %}
+</div>
+{% endblock %}
